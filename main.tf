@@ -38,8 +38,28 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+terraform {
+    backend "s3" {
+        #Replace this with your bucket name!!!
+        bucket  = "terraform-up-and-running-chokk"
+        key   = "global/s3/terraform.tfstate"
+        region = "us-east-2"
 
+        #replace this with your dynamodb table name!
+        dynamodb_table  = "terraform-up-and-running-locks"
+        encrypt = true
+    }
+}
 
+output "s3_bucket_arn" {
+    value = aws_s3_bucket.terraform_state.arn
+    description = "The ARN of the S3 bucket"
+}
+
+output "dynamodb_table_name" {
+    value = aws_dynamodb_table.terraform_locks.name
+    description = "THe name of DynamoDB table"
+}
 
 
 
