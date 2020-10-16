@@ -16,6 +16,28 @@ resource "aws_db_instance" "example" {
     skip_final_snapshot = true
 }
 
+
+### retrieve secret from secrets manager
+
+data "aws_secretsmanager_secret" "db_password" {
+  name = "mysql-master-password-stage"
+}
+
+data "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = data.aws_secretsmanager_secret.db_password.id
+}
+
+terraform {
+  backend "s3" {
+    bucket = "terraform-up-and-running-chokk"
+    key = "stage/data-stores/mysql/terraform.tfstate"
+    region = "us-east-2"
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt = true
+
+  }
+}
+
 /*
 ### store db credentials in secrets manager
 
@@ -40,10 +62,4 @@ data "aws_secretsmanager_secret" "db_password" {
 }
 */
 
-data "aws_secretsmanager_secret" "db_password" {
-  name = "mysql-master-password-stage"
-}
 
-data "aws_secretsmanager_secret_version" "db_password" {
-  secret_id = data.aws_secretsmanager_secret.db_password.id
-}
